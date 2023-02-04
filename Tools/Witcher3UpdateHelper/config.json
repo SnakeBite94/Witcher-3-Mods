@@ -1,0 +1,8 @@
+{
+    "SkipWelcome":  false,
+    "Witcher3ScriptsRepository": "C:\\!programy\\Witcher3-Scripts",
+    "Witcher3GamePath": "G:\\Steam\\steamapps\\common\\The Witcher 3",
+    "PrevVersionBranch": "v4.0-steam",
+    "CurrentVersionBranch": "v4.0.1-steam",
+    "KDiffPath": "C:\\Program Files\\KDiff3"
+}
