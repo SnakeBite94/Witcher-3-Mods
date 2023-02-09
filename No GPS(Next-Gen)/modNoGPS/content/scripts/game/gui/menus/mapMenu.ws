@@ -241,10 +241,13 @@ class CR4MapMenu extends CR4MenuBase
 		
 		l_flashArray = GetMenuFlashValueStorage().CreateTempFlashArray();
 		UpdateEntityPins( l_flashArray );
+		
+		/** NoGPS
 		if ( IsCurrentAreaShown() )
 		{
 			UpdatePlayerPin( l_flashArray );
 		}
+		*/
 		
 		UpdateUserMapPins( l_flashArray, -1 );
 		
@@ -564,7 +567,8 @@ class CR4MapMenu extends CR4MenuBase
 				 pin.type == 'PointOfInterestMappin' ||
 				 pin.type == 'Teleport' ||
 				 pin.type == 'HorseRaceTarget' ||
-				 pin.type == 'HorseRaceDummy' )
+				 pin.type == 'HorseRaceDummy' ||
+				 pin.type == 'Herb' || pin.type == 'Horse' /**NoGPS // Herb/Roach display helps illegal locating and orientating*/ )
 			{
 				continue;
 			}
@@ -1190,7 +1194,6 @@ class CR4MapMenu extends CR4MenuBase
 		var contentTag : name;
 		var progress : float;
 		var rootMenu : CR4Menu;
-		var signposts : array<CGameplayEntity>; //modIFT
 		
 		manager	= theGame.GetCommonMapManager();
 		if ( !manager )
@@ -1246,8 +1249,7 @@ class CR4MapMenu extends CR4MenuBase
 			else
 			{
 				initData = (W3MapInitData)GetMenuInitData();
-				FindGameplayEntitiesInRange( signposts, thePlayer, 5, 1, , , , 'W3FastTravelEntity' ); //modIFT
-				if ( !initData && signposts.Size()==0 ) //modIFT if not at singpost or no nearby signposts are found
+				if ( !initData )
 				{
 					showNotification( GetLocStringByKeyExt("panel_map_cannot_travel") );
 					OnPlaySoundEvent("gui_global_denied");
