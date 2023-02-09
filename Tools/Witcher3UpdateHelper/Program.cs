@@ -58,37 +58,34 @@ namespace Witcher3UpdateHelper
             var all = false;
             foreach (var def in defs)
             {
+                if (cfg.Mode == "f" && !def.OriginalModded.Contains(cfg.Filter))
+                {
+                    continue;
+                }
                 this.CreateBackup(def, cfg);
                 var relative = def.OriginalModded.Replace(cfg.Witcher3ModsFolder, "").TrimStart('\\');
                 var modName = relative.Substring(0, relative.IndexOf("\\"));
                 var fileName = Path.GetFileName(def.OriginalModded);
 
                 var r = default(string);
-                if (!all)
+                if (cfg.Mode == "a")
                 {
-                    Console.Write($"Merge '{fileName}' from mod '{modName}'? [y,n,a,all,q]:");
-                    r = Console.ReadLine();
-                    if (r == "all")
-                    {
-                        all = true;
-                        r = "a";
-                    }
+                    Console.WriteLine($"Auto merging '{fileName}' from mod '{modName}'");
+                    r = "y";
                 }
                 else
                 {
-                    Console.WriteLine($"Auto merging '{fileName}' from mod '{modName}'");
-                    r = "a";
+                    Console.Write($"Merge '{fileName}' from mod '{modName}'? [y,n,q]:");
+                    r = Console.ReadLine();                    
                 }
-                
-
                 if (r == "q")
                 {
                     break;
                 }
-                else if (r == "y" || r == "a")
+                else if (r == "y")
                 {
                     var kdiff = Path.Combine(cfg.KDiffPath, "kdiff3");
-                    this.RunCommand(kdiff, $"\"{def.Base}\" \"{def.Vanilla}\" \"{def.RealModded}\" -o \"{def.RealModded}\" {(r == "a" ? "-auto" : "")}", null);
+                    this.RunCommand(kdiff, $"\"{def.Base}\" \"{def.Vanilla}\" \"{def.RealModded}\" -o \"{def.RealModded}\" {(cfg.Mode == "a" ? "-auto" : "")}", null);
                     var orig = $"{def.RealModded}.orig";
                     if (File.Exists(orig))
                     {
@@ -106,6 +103,14 @@ namespace Witcher3UpdateHelper
         {
             Console.WriteLine("Witcher3 Update helper");
             Console.WriteLine("----------------------");
+            Console.Write("Would you like to go [s]tep-by-step, merge [a]ll or [f]ilter a single mod? [s,a,f]");
+            var mode = Console.ReadLine();
+            cfg.Mode = mode;
+            if (mode == "f")
+            {
+                Console.Write("Mod folder filter: ");
+                cfg.Filter = Console.ReadLine();
+            }
         }
 
 
@@ -131,7 +136,7 @@ namespace Witcher3UpdateHelper
 
         private IEnumerable<string> GetChangedFiles(Config cfg)
         {
-            var changes = this.RunCommand("git", $"diff-tree --no-commit-id --name-only {cfg.CurrentVersionBranch} -r", cfg.Witcher3ScriptsRepository);
+            var changes = this.RunCommand("git", $"diff-tree --no-commit-id --name-only  -r {cfg.PrevVersionBranch} {cfg.CurrentVersionBranch}", cfg.Witcher3ScriptsRepository);
             var files = changes
                 .Replace("/", "\\")
                 .Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
